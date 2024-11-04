@@ -1,0 +1,15 @@
+@startuml SmartHome
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+Person(users, "Пользователи")
+
+
+System(heatingcontrolsystem,"Система управления отоплением")
+System_Ext(sensors, "Датчики температуры")
+System_Ext(heatingsystem, "Система отопления")
+
+Rel_(users, heatingcontrolsystem, "Включить/выключить отопление, Устанавить желаемую температуру, Просматривать температуру", "HTTPS","<-->")
+Rel(sensors,heatingcontrolsystem, "Показания температуры", "HTTPS")
+Rel(heatingcontrolsystem,heatingsystem, "Включкние/Выключение", "HTTPS")
+
+@enduml
