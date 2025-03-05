@@ -1,0 +1,60 @@
+@startuml SmartHome_component
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+
+title Component diagram for SmartHome Application
+
+
+Container(spa, "Single Page Application", "javascript and angular", "Предоставляет пользователям возможность удаленно управлять датчиками и устройствами, просматривать телеметрию и показаная.")
+
+System_Ext(sensors, "Датчики", "Датчики, установленные в домах у пользователей.")
+System_Ext(systems, "Устройства", "Устройства, установленные в домах у пользователей.")
+
+Container_Boundary(api, "SmartHome Application") {
+
+    Component(APIGateWay1,"Users ApiGateWay","SpringBoot","Маршрутизация запросов. Агрегация данных. Управление доступом (Аутентификация, Авторизация). Управление трафиком. Мониторинг и логирование.") 
+    ComponentDb(db1, "Users ApiGateWay Database", "Postgres", "Данные Users ApiGateWay.")
+    Rel(APIGateWay1, db1, "Read & write to", "JDBC")
+
+    Component(APIGateWay2,"Devices ApiGateWay","SpringBoot","Маршрутизация запросов. Агрегация данных. Управление доступом (Аутентификация, Авторизация). Управление трафиком. Мониторинг и логирование.") 
+    ComponentDb(db2, "Devices ApiGateWay Database", "Postgres", "Данные Devices ApiGateWay.")
+    Rel(APIGateWay2, db2, "Read & write to", "JDBC")
+   
+    Component(Users, "Users", "Spring Bean", "Сервис хранения и управления данными пользователя.")
+    ComponentDb(db3, "Users Database", "Postgres", "Данные Пользователей.")
+    Rel_(Users, db3, "Чтение и записть данных в DB", "JDBC","<-->")
+   
+    Component(Devices,"Devices", "Spring Bean", "Сервис хранения и управления информацией об устройстввх и датчиках.")
+    ComponentDb(db4, "Devices Database", "Postgres", "Данные по устройствам и датчикам.")
+    Rel_(Devices, db4, "Чтение и записть данных в DB", "JDBC","<-->")
+    Rel_(Devices, APIGateWay1, "Чтение данных об устройствах/датчиках, передача команд устройствам/дачикам, передача данных об устройствах/датчиках.", "JSON/HTTPS","<-->")
+
+    Component(TelemetrySensorsData,"Telemetry and Sensor data","Сервис хранения и управления данными по телеметрии устройств и показаниям датчиков.") 
+    ComponentDb(db5, "Telemetry and Sensor Database", "ClickHouse", "Данные по телеметрии устройств и данные датчиков.")
+    Rel_(TelemetrySensorsData, db5, "Чтение и записть данных в DB", "JDBC","<-->") 
+
+    ComponentQueue(telemetry_queue, "Kafka", "Телеметрия и данные от устройств и датчиков")    
+    Rel(APIGateWay2,telemetry_queue,"Публикация телеметрии и данных от устройств и датчиков","TCP")
+    Rel(TelemetrySensorsData,telemetry_queue,"Чтение телеметрии и данных от устройств и датчиков","TCP")
+    Rel_(APIGateWay1,TelemetrySensorsData,"Запросы пользователей телеметрии и данных от устройств и датчиков","JSON/HTTPS","<-->")
+    
+    ComponentQueue(devices_queue, "Kafka", "Команды/healthcheck для устройств и датчиков")
+    Rel(APIGateWay2,devices_queue,"Чтение команд/healthcheck для устройств и датчиков","TCP")
+    Rel(APIGateWay2,devices_queue,"Публикация результатов выполнения команд/healthcheck от устройств и датчиков","TCP")
+    Rel_(Devices,devices_queue,"Публикация команд/healthcheck для устройств и датчиков. Чтение результатов.", "TCP","<-->")
+}
+
+
+Rel_( spa, APIGateWay1, "Get Information, send commands", "JSON/HTTPS","<-->")
+
+Rel( sensors, APIGateWay2, "Send telemetry and sensor data", "JSON/HTTPS")
+Rel( APIGateWay2, sensors, "Send commands", "JSON/HTTPS")
+
+Rel( systems, APIGateWay2, "Send telemetry", "JSON/HTTPS")
+Rel( APIGateWay2, systems, "Send commands", "JSON/HTTPS")
+
+Rel_( APIGateWay1, Users, "Send/Get imformation users","<-->")
+
+
+
+@enduml
