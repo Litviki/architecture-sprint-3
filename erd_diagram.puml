@@ -1,0 +1,124 @@
+@startuml SmartHome
+
+entity "Users" {
+  * user_id : NUMBER
+  --
+  username : VARCHAR
+  email : VARCHAR
+  password : VARCHAR
+}
+
+entity "Home" {
+ * home_id : NUMBER
+ --
+ user_id : NUMBER
+ name : VARCHAR
+ description : VARCHAR
+ address : VARCHAR
+}
+
+entity "UsersDevices" {
+  * udevice_id : NUMBER
+  --
+  user_id : NUMBER
+  home_id : NUMBER
+  homelocation : VARCHAR
+  external_device_id : NUMBER
+  name : VARCHAR
+  description : VARCHAR
+  serialnumber : VARCHAR
+  deviceinfo_id : NUMBER 
+  module_id : NUMBER
+}
+
+entity "DevicesInfo" {
+  * deviceinfo_id : NUMBER
+  --
+  name : VARCHAR
+  description : VARCHAR
+  type : VARCHAR
+  subtype : VARCHAR
+  maker : VARCHAR
+  model : VARCHAR
+}
+
+entity "Modules" {
+  * module_id : NUMBER
+  --
+  deviceinfo_id : NUMBER
+  name : VARCHAR
+  description : VARCHAR
+}
+
+entity "DevicesCommands" {
+  * command_id : NUMBER
+  --
+  deviceinfo_id : NUMBER
+  name : VARCHAR
+  description : VARCHAR
+  command : VARCHAR 
+}
+
+entity "DevicesMacros" {
+  * macros_id : NUMBER
+  --
+  deviceinfo_id : NUMBER
+  name : VARCHAR
+  description : VARCHAR
+  macros : VARCHAR
+}
+
+entity "UsersDevicesCommandsMacros" {
+  * udcommand_id : NUMBER
+  --
+  udevice_id : NUMBER
+  command_id : NUMBER
+  macros_id : NUMBER
+  send_dtime : DATETIME 
+  result_dtime : DATETIME 
+  result_code : NUMBER
+  result_data : VARCHAR
+}
+
+entity "TemperatureSensorsData" {
+  * data_id : NUMBER
+  --
+  udevice_id : NUMBER
+  temperature : NUMBER
+  check_time : DATETIME 
+}
+
+entity "TemperatureSensorsTelemetry" {
+  * telemetry_id : NUMBER
+  --
+  udevice_id : NUMBER
+  status : VARCHAR
+  check_time : DATETIME
+}
+
+entity "HeatingSystemTelemetry" {
+  * telemetry_id : NUMBER
+  --
+  udevice_id : NUMBER
+  status : VARCHAR
+  check_time : DATETIME
+}
+
+
+Users --o{ Home
+UsersDevices --|| Users
+UsersDevices --|| Home
+UsersDevices --|| DevicesInfo
+UsersDevices --o{ UsersDevicesCommandsMacros
+UsersDevices --o{ TemperatureSensorsData
+UsersDevices --o{ TemperatureSensorsTelemetry
+UsersDevices --o{ HeatingSystemTelemetry
+Modules --o{ DevicesInfo
+DevicesInfo --o{ DevicesCommands
+DevicesInfo --o{ DevicesMacros
+UsersDevicesCommandsMacros --|| DevicesCommands
+UsersDevicesCommandsMacros --|| DevicesMacros
+
+
+  
+@enduml
