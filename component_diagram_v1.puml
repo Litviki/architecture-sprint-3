@@ -42,6 +42,7 @@ Container_Boundary(api, "SmartHome Application") {
     Rel(APIGateWay2,devices_queue,"Чтение команд/healthcheck для устройств и датчиков","TCP")
     Rel(APIGateWay2,devices_queue,"Публикация результатов выполнения команд/healthcheck от устройств и датчиков","TCP")
     Rel_(Devices,devices_queue,"Публикация команд/healthcheck для устройств и датчиков. Чтение результатов.", "TCP","<-->")
+
 }
 
 
