@@ -39,8 +39,8 @@
 
 
 Задание 2. Визуализируйте архитектуру, которая у вас получилась
-  Файл System_Context_diagram.puml
-  Файл component_diagram_v1.puml
+  - Файл System_Context_diagram.puml
+  - Файл component_diagram_v1.puml
  
 Задание 3. Разработка ER-диаграммы
-  Файл erd_diagram.puml
+  - Файл erd_diagram.puml
