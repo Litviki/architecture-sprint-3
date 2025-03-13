@@ -35,7 +35,6 @@ deactivate KafkaP
 
 DevicesAPI <-- DevicesBL: Response (ID)
 deactivate DevicesBL
-
 APIGateWay1 <-- DevicesAPI: Response (ID) 
 deactivate DevicesAPI
 
