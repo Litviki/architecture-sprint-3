@@ -1,0 +1,42 @@
+@startuml "@Devices Seqence"
+
+participant "Users ApiGateWay" as APIGateWay1 order 1
+participant "Devices API handler/Balancer" as DevicesAPI order 2
+participant "Devices business logic" as DevicesBL order 3
+participant "Devices repository" as DevicesR order 4
+database "Devices Database" as dbDev order 5
+participant "Devices kafka producer" as KafkaP order 6
+queue "Kafka Commands/Healthcheck" as KafkaQ order 7
+
+APIGateWay1 -> DevicesAPI: "Send Command/Healthcheck (ID,Data)" 
+activate DevicesAPI
+DevicesAPI -> DevicesBL: "Send Command/Healthcheck (ID,Data)"
+activate DevicesBL
+DevicesBL -> DevicesR: "Save Command/Healthcheck (ID,Data)"
+activate DevicesR
+DevicesR -> dbDev: "Save Command/Healthcheck (ID,Data)"
+DevicesR <-- dbDev: Response
+DevicesBL <-- DevicesR: Response 
+deactivate DevicesR
+DevicesBL -> KafkaP: "Send Command/Healthcheck (ID,Data)"
+
+activate KafkaP
+KafkaP -> KafkaQ: "Save Command/Healthcheck (ID,Data)" 
+KafkaP <-- KafkaQ: Kafka Response
+DevicesR <- KafkaP: Save Kafka Response
+
+activate DevicesR
+DevicesR -> dbDev: Save Kafka Response
+DevicesR <-- dbDev: Response
+DevicesR --> KafkaP: Response
+deactivate DevicesR
+DevicesBL <-- KafkaP: Response Command/Healthcheck (ID)
+deactivate KafkaP
+
+DevicesAPI <-- DevicesBL: Response (ID)
+deactivate DevicesBL
+
+APIGateWay1 <-- DevicesAPI: Response (ID) 
+deactivate DevicesAPI
+
+@enduml
