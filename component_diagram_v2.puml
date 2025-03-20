@@ -1,0 +1,43 @@
+@startuml Devices_component
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+
+title Component diagram for Devices component
+
+Container(UsersAPIGateway, "Users API Gateway service", "SpringBoot", "Users API Gateway service")
+ContainerQueue(ProducerQueue, "Kafka", "Команды/healthcheck для устройств и датчиков")
+ContainerQueue(ConsumerQueue, "Kafka", "Команды/healthcheck для устройств и датчиков")
+
+
+
+Container_Boundary(Devices, "Devices service component") {
+
+Component(ApiGateWay,"Devices API handler/balancer","SpringBoot","API handler/balancer") 
+ComponentDb(ApiDataCache, "Api Data Cache", "Redis", "Devices Request Cache (JSON)")
+Component(DevicesComponent,"Devices component","SpringBoot","Devices business logic service") 
+
+Rel_(ApiGateWay, DevicesComponent, "Data request for Devises, commands for Devices", "REST","<-->")
+Rel_(ApiGateWay, ApiDataCache, "Requests for Devises Service(JSON)", "TCP","<-->")
+
+
+Component(DevicesRepository,"Devices repository","SpringBoot","Devices repository component") 
+ComponentDb(RepositoryCache, "Repository Cache", "Redis", "Repository Cache (DTO)")
+ComponentDb(DevicesDB, "Devices Database", "PostgreSQL", "Devices and Sensors data")
+
+Rel_(DevicesComponent, DevicesRepository, "Buisness data (Devices)", "REST","<-->")
+Rel_(DevicesRepository, DevicesDB, "Load and Save Devices data", "JDBC","<-->")
+Rel_(DevicesRepository, RepositoryCache, "Load and Save Devices data DTO", "TCP","<-->")
+
+Component(Producer,"Producer","SpringBoot","Devices kafka producer. Publication commands/healthcheck")
+Component(Consumer,"Consumer","SpringBoot","Devices kafka consumer")
+
+Rel(DevicesComponent,Producer,"Messages with commands/healthcheck","REST")
+Rel(Consumer, DevicesComponent,"Messages with results: commands/healthchecks","REST")
+
+}
+
+Rel_(UsersAPIGateway, ApiGateWay, "Data request for Devises, commands for Devices", "REST","<-->")
+Rel(Producer,ProducerQueue,"Producer Queue, Messages for Devices/Sensors with commands/healthcheck","TCP")
+Rel(ConsumerQueue,Consumer,"Consumer Queue, Messages with results: commands and healthchecks","TCP")
+
+@enduml
